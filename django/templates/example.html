@@ -1,0 +1,294 @@
+<!DOCTYPE html>
+{% load static %}
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <title>트위터 업비트 정보</title>
+    <script src="https://code.highcharts.com/highcharts.js"></script>
+    <script src="https://code.highcharts.com/modules/series-label.js"></script>
+    <script src="https://code.highcharts.com/modules/exporting.js"></script>
+    <script src="https://code.highcharts.com/modules/export-data.js"></script>
+
+        <!-- Bootstrap core CSS -->
+<link href="{% static 'css/bootstrap.min.css' %}" rel="stylesheet">
+
+    <style>
+      .bd-placeholder-img {
+        font-size: 1.125rem;
+        text-anchor: middle;
+        -webkit-user-select: none;
+        -moz-user-select: none;
+        user-select: none;
+      }
+
+      @media (min-width: 768px) {
+        .bd-placeholder-img-lg {
+          font-size: 3.5rem;
+        }
+      }
+    </style>
+
+
+    <!-- Custom styles for this template -->
+    <link href="{% static 'css/features.css' %}" rel="stylesheet">
+    <link href="{% static 'css/chart.css' %}" rel="stylesheet">
+    <!--(자동새로고침) meta http-equiv="refresh" content="5"-->
+
+</head>
+<body>
+<svg xmlns="http://www.w3.org/2000/svg" style="display: none;">
+    <symbol id="people-circle" viewBox="0 0 16 16">
+    <path d="M11 6a3 3 0 1 1-6 0 3 3 0 0 1 6 0z"/>
+    <path fill-rule="evenodd" d="M0 8a8 8 0 1 1 16 0A8 8 0 0 1 0 8zm8-7a7 7 0 0 0-5.468 11.37C3.242 11.226 4.805 10 8 10s4.757 1.225 5.468 2.37A7 7 0 0 0 8 1z"/>
+  </symbol>
+</svg>
+<nav class="navbar navbar-expand-md navbar-dark bg-dark mb-4">
+    <div class="container-fluid">
+        <a class="navbar-brand">트위터 업비트 정보</a>
+    </div>
+    <form class="d-flex" method="post" action="{% url 'search' %}">
+        {% csrf_token %}
+        <input class="form-control me-2" type="search" name="ID" placeholder="Twitter ID" aria-label="Search">
+        <input class="form-control me-2" type="search" name="word" placeholder="Word" aria-label="Search">
+        <button class="btn btn-outline-primary" type="submit">Search</button>
+        </form>
+    </nav>
+<div class="b-example-divider"></div>
+<div class="container px-8 py-10" id="featured-3">
+    <h2 class="pb-2 border-bottom">{{user_id}}'s Tweet</h2>
+    <div class="row g-8 py-10 row-cols-1 row-cols-lg-3">
+      <div class="feature col">
+        <a href="https://twitter.com/elonmusk" title="link to {{user_id}}'s twitter">
+            <div class="feature-icon bg-primary bg-gradient">
+                <svg class="bi" width="1em" height="1em"><use xlink:href="#people-circle"/></svg>
+            </div>
+          </a>
+        <h4>{{tweet_text}}</h4>
+        <p>{{tweet_date}}</p>
+      </div>
+        <div class="feature col">
+            <h3>{{keyword}} in tweet</h3>
+            <div id="tweet-keyword" style="overflow:auto; width:500px; height:150px;">
+                <p>{{recent_tweet.0}}</p>
+                <p>{{recent_tweet.1}}</p>
+                <p>{{recent_tweet.2}}</p>
+                <p>{{recent_tweet.3}}</p>
+                <input id="stream-btn" class="btn btn-primary" type="button" value="refresh">
+                <!--
+                <script>
+                    const streamSocket = new WebSocket(
+                        'ws://'
+                        + window.location.host
+                        + '/ws/stream/'
+                    );
+
+                    streamSocket.onmessage = function(e) {
+                        const data = JSON.parse(e.data);
+                        document.querySelector('#tweet-keyword').value += (data.message + '\n');
+                    };
+
+                    streamSocket.onclose = function(e) {
+                        console.error('tweet socket closed unexpectedly');
+                    };
+
+                    document.querySelector('#stream-btn').onclick = function(e) {
+                        message = "k"
+                        chatSocket.send(JSON.stringify({
+                            'message': message
+                        }));
+                    };
+                </script>
+                -->
+            </div>
+            <!--
+            <form class="d-flex" action="{% url 'refresh' %}">
+                <a href="" class="btn btn-primary">
+                Refresh
+                </a>
+            </form>
+            -->
+            <svg class="bi" width="1em" height="1em"><use xlink:href="#collection"/></svg>
+        </div>
+    </div>
+</div>
+<div class="b-example-divider"></div>
+  <div class="container-fluid pb-3">
+    <div class="d-grid gap-3" style="grid-template-columns: 1fr 2fr;">
+      <div class="bg-light border rounded-3">
+          <h5>내 업비트 정보</h5>
+          <p>잔고 : </p>
+          <p>매수한 업비트 목록</p><br><br><br><br><br><br><br>
+      </div>
+      <div class="bg-light border rounded-3">
+          <h5>내가 주문한 업비트 목록</h5>
+          <div style="overflow:auto; width:900px; height:200px;">
+          <table class="table table-striped table-hover" style="text-align: center">
+            <thead>
+                <tr>
+                    <th scope="col">#</th>
+                    <th scope="col">마켓명</th>
+                    <th scope="col">주문가격</th>
+                    <th scope="col">주문수량</th>
+                    <th scope="col">주문취소</th>
+                </tr>
+            </thead>
+            <tbody>
+                <tr>
+                    <th scope="row">1</th>
+                    <td>Doge/KRW</td>
+                    <td>200</td>
+                    <td>10</td>
+                    <td><input id="first-btn" class="btn btn-primary" type="button" value="cancel"></td>
+                </tr>
+            <tr>
+                <th scope="row">2</th>
+                <td>BTC/KRW</td>
+                <td>53015000</td>
+                <td>1</td>
+                <td><input id="second-btn" class="btn btn-primary" type="button" value="cancel"></td>
+            </tr>
+                <tr>
+                    <th scope="row">3</th>
+                    <td>ETH/KRW</td>
+                    <td>4185000</td>
+                    <td>5</td>
+                    <td><input id="third-btn" class="btn btn-primary" type="button" value="cancel"></td>
+                </tr>
+            </tbody>
+        </table>
+          </div>
+      </div>
+    </div>
+  </div>
+<div class="b-example-divider"></div>
+    <div class="container-fluid pb-3">
+        <div class="d-grid gap-3" style="grid-template-columns: 1fr 2fr;">
+            <div class="bg-light border rounded-3">
+                <p>DOGE/KRW 업비트 정보&emsp;&emsp;&emsp;&emsp;&emsp;<input id="order-btn" class="btn btn-primary" type="button" value="purchase">
+                &emsp;&emsp;&emsp;<input id="sell-btn" class="btn btn-primary" type="button" value="sell"></p>
+                <p>현재가 조회 &nbsp;&nbsp;&nbsp;&nbsp;: {{price}} KRW</p>
+                <p>총 매수 호가 &nbsp;&nbsp;&nbsp;: {{total_ask_price}} KRW</p>
+                <p>총 매도 호가 &nbsp;&nbsp;&nbsp;: {{total_bid_price}} KRW</p>
+                <h5>&emsp;&emsp;&emsp;&emsp;&emsp;&emsp;&emsp;&emsp;&emsp;호가 정보</h5>
+                <div style="overflow:auto; width:500px; height:200px;">
+                    <table class="table table-bordered table-hover">
+                        <thead>
+                    <tr>
+                        <th scope="col">매수호가수량</th>
+                        <th scope="col">매수호가</th>
+                        <th scope="col">매도호가</th>
+                        <th scope="col">매도호가수량</th>
+                    </tr>
+                    </thead>
+                        <tbody>
+                            <tr>
+                                <td>47054.71793572</td>
+                                <td>195</td>
+                                <td>194</td>
+                                <td>5502687.54494307</td>
+                            </tr>
+                            <tr>
+                                <td>4223687.6616858</td>
+                                <td>196</td>
+                                <td>193</td>
+                                <td>5072063.36149293</td>
+                            </tr>
+                            <tr>
+                                <td>5363359.92065527</td>
+                                <td>197</td>
+                                <td>192</td>
+                                <td>5002882.13681883</td>
+                            </tr>
+                            <tr>
+                                <td>4468672.08340456</td>
+                                <td>198</td>
+                                <td>191</td>
+                                <td>5372745.62546625</td>
+                            </tr>
+                            <tr>
+                                <td>707944.9925391</td>
+                                <td>199</td>
+                                <td>190</td>
+                                <td>8024408.42869161</td>
+                            </tr>
+                            <tr>
+                                <td>1524654.63665569</td>
+                                <td>200</td>
+                                <td>190</td>
+                                <td>2558558.67155878</td>
+                            </tr>
+                        </tbody>
+                    </table>
+                </div>
+                <p>&emsp;&emsp;&emsp;&emsp;&emsp;&emsp;&emsp;&emsp;&emsp;&emsp;&emsp;&emsp;&emsp;&emsp;&emsp;&emsp;&emsp;&emsp;&emsp;&emsp;
+                    &emsp;&emsp;&emsp;호가 단위 : KRW</p>
+            </div>
+            <div class="bg-light border rounded-3">
+                <h5>최근 24시간 DOGE/KRW 업비트 차트</h5>
+                <figure class="highcharts-figure">
+                <div id="container"></div>
+                <p class="highcharts-description">
+                </p>
+                </figure>
+                <script>
+                Highcharts.chart('container', {
+                    chart: {type: 'spline'},
+                    title: {text: 'Upbit Chart per hour'},
+                    subtitle: {text: 'Upbit DOGE/KRW'},
+                    xAxis: {
+                        categories: {{result_date | safe}}
+                    },
+                    yAxis: {
+                        title: {text: 'KRW'},
+                        labels: {
+                            formatter: function () {return this.value;}
+                        }
+                    },
+                    tooltip: {
+                        crosshairs: true,
+                        shared: true
+                    },
+                    plotOptions: {
+                        spline: {
+                            marker: {
+                                radius: 4,
+                                lineColor: '#666666',
+                                lineWidth: 1
+                            }
+                        }
+                    },
+                    series: [{
+                        name: '시가',
+                        marker: {symbol: 'square'},
+                        data: {{result_open}}
+                        },
+                        {
+                        name: '종가',
+                        marker: {
+                            symbol: 'diamond'
+                        },
+                        data: {{result_close}}
+                        },
+                        {
+                        name: '고가',
+                        marker: {
+                            symbol: 'triangle'
+                        },
+                        data: {{result_high}}
+                        },
+                        {
+                        name: '저가',
+                        marker: {
+                            symbol: 'circle'
+                        },
+                        data: {{result_low}}
+                        }
+                        ]
+                    });
+                </script>
+            </div>
+        </div>
+    </div>
+<div class="b-example-divider"></div>
+</body>
+</html>
