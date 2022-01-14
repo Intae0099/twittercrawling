@@ -21,5 +21,7 @@ urlpatterns = [
     path('', views.example, name='example'),
     path('search/', views.search, name='search'),
     path('', views.refresh, name='refresh'),
-    path('ws/stream/', views.stream, name='stream'),
+    #path('ws/stream/', views.stream, name='stream'),
+    path('cancel/', views.cancelorder, name='cancel'),
+    path('purchase/', views.purchase, name='purchase'),
 ]
