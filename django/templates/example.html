@@ -8,6 +8,7 @@
     <script src="https://code.highcharts.com/modules/series-label.js"></script>
     <script src="https://code.highcharts.com/modules/exporting.js"></script>
     <script src="https://code.highcharts.com/modules/export-data.js"></script>
+    <script src="https://code.jquery.com/jquery-3.6.0.min.js"></script>
 
         <!-- Bootstrap core CSS -->
 <link href="{% static 'css/bootstrap.min.css' %}" rel="stylesheet">
@@ -74,39 +75,18 @@
                 <p>{{recent_tweet.2}}</p>
                 <p>{{recent_tweet.3}}</p>
                 <input id="stream-btn" class="btn btn-primary" type="button" value="refresh">
-                <!--
-                <script>
-                    const streamSocket = new WebSocket(
-                        'ws://'
-                        + window.location.host
-                        + '/ws/stream/'
-                    );
+            <script language="javascript">.
+                var ws_url = 'ws://' + window.location.host + '/ws/ticks/';
+                var ticksSocket = new WebSocket(ws_url);
 
-                    streamSocket.onmessage = function(e) {
-                        const data = JSON.parse(e.data);
-                        document.querySelector('#tweet-keyword').value += (data.message + '\n');
-                    };
-
-                    streamSocket.onclose = function(e) {
-                        console.error('tweet socket closed unexpectedly');
-                    };
-
-                    document.querySelector('#stream-btn').onclick = function(e) {
-                        message = "k"
-                        chatSocket.send(JSON.stringify({
-                            'message': message
-                        }));
-                    };
-                </script>
-                -->
+                ticksSocket.onmessage = function(event) {
+                    var data = JSON.parse(stream_data);
+                    console.log('data', data);
+                    document.querySelector("#tweet-keyword").value += (message + '\n');
+                    // do whatever required with received data ...
+                };
+            </script>
             </div>
-            <!--
-            <form class="d-flex" action="{% url 'refresh' %}">
-                <a href="" class="btn btn-primary">
-                Refresh
-                </a>
-            </form>
-            -->
             <svg class="bi" width="1em" height="1em"><use xlink:href="#collection"/></svg>
         </div>
     </div>
@@ -116,8 +96,9 @@
     <div class="d-grid gap-3" style="grid-template-columns: 1fr 2fr;">
       <div class="bg-light border rounded-3">
           <h5>내 업비트 정보</h5>
-          <p>잔고 : </p>
-          <p>매수한 업비트 목록</p><br><br><br><br><br><br><br>
+          <p>잔고 &emsp;&emsp;&emsp;&emsp;&nbsp;&nbsp;&emsp;: {{mymoney}}</p>
+          <p>총 매수 금액 &emsp;&emsp;: {{allmount}}</p>
+          <p>KRW-DOGE 수량 : {{bitamount}}</p><br><br><br><br><br><br>
       </div>
       <div class="bg-light border rounded-3">
           <h5>내가 주문한 업비트 목록</h5>
@@ -128,11 +109,41 @@
                     <th scope="col">#</th>
                     <th scope="col">마켓명</th>
                     <th scope="col">주문가격</th>
-                    <th scope="col">주문수량</th>
-                    <th scope="col">주문취소</th>
+                    <th scope="col">거래량</th>
+                    <th scope="col">구매호가</th>
                 </tr>
             </thead>
             <tbody>
+            {% for key in myubpitlist %}
+            <tr>
+                <th scope="row">{{forloop.counter}}</th>
+                <td>{{key.0}}</td>
+                <td>{{key.1}}</td>
+                <td>{{key.2}}</td>
+                <td>{{key.3}}</td>
+                    <!-- uuid를 알경우 추가
+                    <form class="d-flex" method="post" action="{% url 'cancel' %}">
+                        <input id="{{forloop.counter0}}btn" class="btn btn-primary" type="button" value="cancel">
+                <script>
+
+                $('{{forloop.counter0}}btn').click(function() {
+                var num = {{forloop.counter0}};
+                $.ajax({
+                    url: "{% url 'cancel' %}",
+                    type: "POST",
+                    data: {'num' : num}
+                    success: function (data) {
+                        alert("주문 취소 완료");
+                    }
+                });
+            });
+                </script>
+                    </form>
+                </td>
+                -->
+            </tr>
+            {% endfor %}
+            <!-- example
                 <tr>
                     <th scope="row">1</th>
                     <td>Doge/KRW</td>
@@ -154,6 +165,7 @@
                     <td>5</td>
                     <td><input id="third-btn" class="btn btn-primary" type="button" value="cancel"></td>
                 </tr>
+                -->
             </tbody>
         </table>
           </div>
@@ -164,11 +176,26 @@
     <div class="container-fluid pb-3">
         <div class="d-grid gap-3" style="grid-template-columns: 1fr 2fr;">
             <div class="bg-light border rounded-3">
-                <p>DOGE/KRW 업비트 정보&emsp;&emsp;&emsp;&emsp;&emsp;<input id="order-btn" class="btn btn-primary" type="button" value="purchase">
-                &emsp;&emsp;&emsp;<input id="sell-btn" class="btn btn-primary" type="button" value="sell"></p>
+                <form class="d-flex" method="post" action="{% url 'purchase' %}">
+                <p>DOGE/KRW 업비트 정보&emsp;
+                    {% csrf_token %}
+                    <input class="input-lg" type="search" name="purchase" placeholder="Market Price" aria-label="Search">
+                    <!input id="purchase" class="btn btn-primary" type="button" value="purchase">
+                    <button class="btn btn-outline-primary" type="submit">Purchase</button>
+                </p>
+                </form>
+                {% if messages %}
+                <div class="messages">
+                    {% for message in messages %}
+                    <div class="alert alert-{% if message.tag %}{{ message.tags }}{% endif %}" role="alert">
+                    {{ message }}
+                    </div>
+                {% endfor %}
+                </div>
+                {% endif %}
                 <p>현재가 조회 &nbsp;&nbsp;&nbsp;&nbsp;: {{price}} KRW</p>
-                <p>총 매수 호가 &nbsp;&nbsp;&nbsp;: {{total_ask_price}} KRW</p>
-                <p>총 매도 호가 &nbsp;&nbsp;&nbsp;: {{total_bid_price}} KRW</p>
+                <p>총 매수 호가 &nbsp;&nbsp;&nbsp;: {{total_ask_price}}</p>
+                <p>총 매도 호가 &nbsp;&nbsp;&nbsp;: {{total_bid_price}}</p>
                 <h5>&emsp;&emsp;&emsp;&emsp;&emsp;&emsp;&emsp;&emsp;&emsp;호가 정보</h5>
                 <div style="overflow:auto; width:500px; height:200px;">
                     <table class="table table-bordered table-hover">
@@ -181,46 +208,19 @@
                     </tr>
                     </thead>
                         <tbody>
+                            {% for key in orderbook%}
                             <tr>
-                                <td>47054.71793572</td>
-                                <td>195</td>
-                                <td>194</td>
-                                <td>5502687.54494307</td>
+                                <td>{{key.ask_size}}</td>
+                                <td>{{key.ask_price}}</td>
+                                <td>{{key.bid_price}}</td>
+                                <td>{{key.bid_size}}</td>
                             </tr>
-                            <tr>
-                                <td>4223687.6616858</td>
-                                <td>196</td>
-                                <td>193</td>
-                                <td>5072063.36149293</td>
-                            </tr>
-                            <tr>
-                                <td>5363359.92065527</td>
-                                <td>197</td>
-                                <td>192</td>
-                                <td>5002882.13681883</td>
-                            </tr>
-                            <tr>
-                                <td>4468672.08340456</td>
-                                <td>198</td>
-                                <td>191</td>
-                                <td>5372745.62546625</td>
-                            </tr>
-                            <tr>
-                                <td>707944.9925391</td>
-                                <td>199</td>
-                                <td>190</td>
-                                <td>8024408.42869161</td>
-                            </tr>
-                            <tr>
-                                <td>1524654.63665569</td>
-                                <td>200</td>
-                                <td>190</td>
-                                <td>2558558.67155878</td>
-                            </tr>
+                            {% endfor %}
                         </tbody>
                     </table>
                 </div>
                 <p>&emsp;&emsp;&emsp;&emsp;&emsp;&emsp;&emsp;&emsp;&emsp;&emsp;&emsp;&emsp;&emsp;&emsp;&emsp;&emsp;&emsp;&emsp;&emsp;&emsp;
+
                     &emsp;&emsp;&emsp;호가 단위 : KRW</p>
             </div>
             <div class="bg-light border rounded-3">
