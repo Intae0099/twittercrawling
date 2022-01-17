@@ -12,7 +12,6 @@
 
         <!-- Bootstrap core CSS -->
 <link href="{% static 'css/bootstrap.min.css' %}" rel="stylesheet">
-
     <style>
       .bd-placeholder-img {
         font-size: 1.125rem;
@@ -28,13 +27,9 @@
         }
       }
     </style>
-
-
     <!-- Custom styles for this template -->
     <link href="{% static 'css/features.css' %}" rel="stylesheet">
     <link href="{% static 'css/chart.css' %}" rel="stylesheet">
-    <!--(자동새로고침) meta http-equiv="refresh" content="5"-->
-
 </head>
 <body>
 <svg xmlns="http://www.w3.org/2000/svg" style="display: none;">
@@ -110,7 +105,7 @@
                     <th scope="col">마켓명</th>
                     <th scope="col">주문가격</th>
                     <th scope="col">거래량</th>
-                    <th scope="col">구매호가</th>
+                    <th scope="col">판매</th>
                 </tr>
             </thead>
             <tbody>
@@ -120,52 +115,13 @@
                 <td>{{key.0}}</td>
                 <td>{{key.1}}</td>
                 <td>{{key.2}}</td>
-                <td>{{key.3}}</td>
-                    <!-- uuid를 알경우 추가
-                    <form class="d-flex" method="post" action="{% url 'cancel' %}">
+                <td>
+                    <a href="https://upbit.com/exchange?code=CRIX.UPBIT.KRW-DOGE" title="link to {{key.0}} sell">
                         <input id="{{forloop.counter0}}btn" class="btn btn-primary" type="button" value="cancel">
-                <script>
-
-                $('{{forloop.counter0}}btn').click(function() {
-                var num = {{forloop.counter0}};
-                $.ajax({
-                    url: "{% url 'cancel' %}",
-                    type: "POST",
-                    data: {'num' : num}
-                    success: function (data) {
-                        alert("주문 취소 완료");
-                    }
-                });
-            });
-                </script>
-                    </form>
+                    </a>
                 </td>
-                -->
             </tr>
             {% endfor %}
-            <!-- example
-                <tr>
-                    <th scope="row">1</th>
-                    <td>Doge/KRW</td>
-                    <td>200</td>
-                    <td>10</td>
-                    <td><input id="first-btn" class="btn btn-primary" type="button" value="cancel"></td>
-                </tr>
-            <tr>
-                <th scope="row">2</th>
-                <td>BTC/KRW</td>
-                <td>53015000</td>
-                <td>1</td>
-                <td><input id="second-btn" class="btn btn-primary" type="button" value="cancel"></td>
-            </tr>
-                <tr>
-                    <th scope="row">3</th>
-                    <td>ETH/KRW</td>
-                    <td>4185000</td>
-                    <td>5</td>
-                    <td><input id="third-btn" class="btn btn-primary" type="button" value="cancel"></td>
-                </tr>
-                -->
             </tbody>
         </table>
           </div>
