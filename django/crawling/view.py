@@ -1,9 +1,7 @@
 from django.shortcuts import render
-#from .forms import SearchForm
 import json
 import twitter
 import pyupbit
-#import threading
 from django.contrib import messages
 import re
 
@@ -30,9 +28,7 @@ stream_data = []
 
 
 def getApi(id, keyword):
-#id = "@elonmusk"
     tweet = twitter_api.GetUserTimeline(screen_name=id, count=1000, include_rts=False, exclude_replies=True)
-    #그림일때 텍스트 불러들여오기 실패, 일정 시간 후에 다시 불러들이기 가능
     if tweet:
         pass
     else:
@@ -107,6 +103,37 @@ def myupbitinfo():
     return myubpitlist
 
 # Create your views here.
+def index(request):
+    return (render(request, 'index.html', {}))
+
+def checkAPI(request):
+    if request.method == 'POST':
+        check_consumer_key = request.POST['consumer_key']
+        check_consumer_secret = request.POST['consumer_secret']
+        check_access_token = request.POST['access_token']
+        check_access_token_secret = request.POST['access_secret']
+        check_access_key = request.POST['access_key']
+        check_secret_key = request.POST['secret_key']
+        check_twitter_api = twitter.Api(consumer_key=check_consumer_key,
+                                  consumer_secret=check_consumer_secret,
+                                  access_token_key=check_access_token,
+                                  access_token_secret=check_access_token_secret)
+        global twitter_api
+        twitter_api = check_twitter_api
+        global upbit
+        upbit = pyupbit.Upbit(check_access_key, check_secret_key)
+        if check_twitter_api:
+            if upbit:
+                messages.add_message(request, messages.SUCCESS, 'API가 일치합니다')
+                return example(request)
+            else:
+                messages.add_message(request, messages.ERROR, 'UPBIT API key가 일치하지 않습니다')
+                return (render(request, 'index.html', {}))
+        else:
+            messages.add_message(request, messages.ERROR, 'Twiter API key가 일치하지 않습니다')
+            return (render(request, 'index.html', {}))
+
+
 def example(request):
     id = "@elonmusk"
     keyword = "Tesla"
@@ -128,13 +155,6 @@ def example(request):
     bitamount = upbit.get_balance(ticker="KRW-DOGE")
     myorderlist = upbit.get_order("KRW-DOGE", state="done")
     total_ask_price, total_bid_price, ask_size, bid_size, var_orderbook = orderbook()
-    """
-    numid = ['44196397']
-    streaming = twitter_api.GetStreamFilter(follow=numid)
-    temp = streaming['user']
-    if temp['id_str'] == numid[0]:
-        stream = temp['text']
-    """
     myubpitlist = myupbitinfo()
     keyword = "recent tweet"
     return render(request, 'example.html',{'user_id': id, 'tweet_text': today_tweet,'tweet_date': tweet_date,
@@ -201,16 +221,6 @@ def refresh(request):
                                             'ask_size': ask_size, 'bid_size': bid_size, 'mymoney': mymoney, 'allmount': allamount,
                                             'bitamount': bitamount, 'myorderlist': myorderlist,
                                             'myubpitlist': myubpitlist})
-"""
-스트림 함수
-def stream(request):
-    global global_id
-    global global_word
-    myid = ['1473487493375082500']
-    today_tweet, tweet_date, tweet, keyword_tweet = getApi(global_id, global_word)
-    return render(request, 'example.html', {'user_id': global_id, 'tweet_text': today_tweet, 'tweet_date': tweet_date,
-                                            'keyword_tweet': keyword_tweet, 'keyword': global_word})
-"""
 
 def cancelorder(request):
     if request.method == 'POST':
@@ -240,7 +250,6 @@ def cancelorder(request):
         uuid_list = []
         for uuid in myorderlist:
             uuid_list.append(uuid[num])
-        #cancel 버튼 누른 곳 위치 html에서 읽어와서 숫자 대입 필요
         upbit.cancel_order(uuid_list[int(num)])
         myorderlist = upbit.get_order("KRW-DOGE", state="done")
         myubpitlist = myupbitinfo()
